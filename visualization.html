@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!--Styling-->
+<link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Roboto&display=swap" rel="stylesheet">
+
+<!--Load d3js. Version number matters here!-->
+<script src="https://d3js.org/d3.v6.js"></script>
+
+<!-- Load tableau embedding -->
+<script type="module" src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"></script>
+
+<h1>Olympic Women's Gymnastics Visualizations</h1>
+<h3>Brianna Ta</h3>
+
+<!--Embed tableau graph-->
+<tableau-viz id="tableauViz"       
+  src='https://prod-useast-b.online.tableau.com/t/bta7bcbfe131f4/views/WomensGymnastics/Sheet2?:origin=card_share_link&:embed=n'>
+</tableau-viz>
+
+<br>
+
+<!--Create a div where the graph will appear.-->
+<div class="row">
+    <div id="chart"></div>
+    <div id="tooltip"></div>
+</div>
+
+<div>
+    <img id="image" src="all.png"/>
+</div>
+
+<script>
+const margin = {top: 10, right: 30, bottom: 30, left:60}
+const width = 460 - margin.left - margin.right
+const height = 400 - margin.top - margin.bottom
+
+// Append the SVG to the body of the page
+const svg = d3.select("#chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
+d3.csv("athlete_events.csv", function(d) {
+    return {
+        height: +d['Height'],
+        medal: d["Medal"],
+    }
+}).then(function(data) {
+
+    let sums = {
+        'Gold': 0,
+        'Silver': 0,
+        'Bronze': 0,
+        'NA': 0
+    };
+
+    let num = {
+        'Gold': 0,
+        'Silver': 0,
+        'Bronze': 0,
+        'NA': 0
+    };
+
+    data.forEach(function(d) {
+        if(!isNaN(d.height)) {
+            sums[d.medal] += d.height;
+            num[d.medal] += 1;
+        }
+    })
+
+    let averages = [
+        {
+            medal: 'Gold',
+            height: sums['Gold'] / num['Gold']
+        },
+        {
+            medal: 'Silver',
+            height: sums['Silver'] / num['Silver']
+        },
+        {
+            medal: 'Bronze',
+            height: sums['Bronze'] / num['Bronze']
+        },
+        {
+            medal: 'NA',
+            height: sums['NA'] / num['NA']
+        }
+    ]
+    
+    // Adding an x-scale
+    const x = d3.scaleBand()
+                .domain(averages.map(function(d) { return d.medal; }))
+                .range([0, width])
+                .padding([0.2])
+    
+    const y = d3.scaleLinear()
+                .domain([0, 200])
+                .range([height, 0])
+    
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+    
+    svg.append("g")
+        .call(d3.axisLeft(y))
+
+    // Create a tooltip
+    var tooltip = d3.select("#tooltip")
+        .style("visibility", "hidden")
+
+    var image = d3.select("#image")
+
+    svg.selectAll(".bar")
+        .data(averages)
+        .join("rect")
+            .attr("x", function(d){
+                return x(d.medal)
+            })
+            .attr("y", d => y(d.height))
+            .attr("width", x.bandwidth)
+            .attr("height", function(d){
+                return height - y(d.height)
+            })
+            .on("mouseover", function(e, d) {   
+                image.attr("src", d.medal + ".png");
+                return tooltip.style("visibility", "visible")   
+                                .html("Height: " + d.height);
+            })
+            .on("mouseout", function(e, d) { 
+                image.attr("src", "all.png");
+                return tooltip.style("visibility", "hidden"); 
+                                                                
+            })
+            .style("fill", function(d) {
+            if (d.medal == "Gold") {
+                return "#FFD700";
+            } else if (d.medal == "Silver") {
+                return "#C0C0C0";
+            } else if (d.medal == "Bronze") {
+                return "#CD7F32";
+            }
+            return "steelblue";
+        })
+        
+    
+})
+</script>
