@@ -132,7 +132,9 @@ d3.csv("athlete_events.csv", function(d) {
                 return height - y(d.height)
             })
             .on("mouseover", function(e, d) {   
-                image.attr("src", d.medal + ".png");
+                if(d.medal != "NA") {
+                    image.attr("src", d.medal + ".png");
+                }
                 return tooltip.style("visibility", "visible")   
                                 .html("Height: " + d.height);
             })
