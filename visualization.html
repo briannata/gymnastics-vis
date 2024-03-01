@@ -16,11 +16,21 @@
 <h1>Olympic Women's Gymnastics Visualizations</h1>
 <h3>Brianna Ta</h3>
 
+
+<br>
+<p><b>Data Source: </b><a target="_blank" href="https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results?resource=download">Kaggle</a></p>
+<p><b>Original Story: </b><a target="_blank" href="https://www.sportsrec.com/546292-what-is-the-advantage-of-a-gymnast-being-short-in-stature.html">SportsRec</a></p>
+
+<br>
+<p><b>Central Question: </b>Is there an association between shorter heights and winning a Women's Gymnastics medal at the Olympics?</p>
+
 <!--Embed tableau graph-->
 <tableau-viz id="tableauViz"       
   src='https://prod-useast-b.online.tableau.com/t/bta7bcbfe131f4/views/WomensGymnastics/Sheet2?:origin=card_share_link&:embed=n'>
 </tableau-viz>
 
+<br>
+<p><b>Visualization 1: </b>This first visualization was created in Tableau and displays the age and height of all women's gymnastics olympians from Athens 1896 to Rio 2016. The color of each point in the scatter plot indicates whether they won a medal and what place they achieved. From the graph, we can see that most of the gold medalists are in the center of the data and don't have a height greater than 166 cm. There doesn't seem to be a clear association between height and winning a medal so we will use more visualizations to explore this further.</p>
 <br>
 
 <!--Create a div where the graph will appear.-->
@@ -29,9 +39,19 @@
     <div id="tooltip"></div>
 </div>
 
+<br>
+<p><b>Visualization 2: </b>This visualization was created using D3 and uses a bar graph to display the average height of women's gymnastics olympians based on what medal they won. There doesn't seem to be a significant difference, but I noted that gold medalists had an average height of around 154 centimeters, while silver and bronze medalists had average heights of around 155 cm and 155.6 cm respectively. Gymnasts who did not medal had an average height of around 156.2 cm, the highest average out of these categories. While this does not seem to be a significant difference, there does seem to be some evidence that Olympian gold medalists are typically shorter.</p>
+<br>
+
 <div>
     <img id="image" src="all.png"/>
 </div>
+
+<br>
+<p><b>Visualization 3: </b>This visualization was created using Altair and displays the distribution of heights for each type of medal using histograms. By hovering over each of the bars in the second visualization, you can change which histogram you are looking at. When hovering over none of the bars or the NA bar, you can see the distribution of all heights of women's gymnasts. The turqoise blue line indicates the overall average height of all women's gymnasts and allows us to compare the various histograms. Surprisingly, there are plenty of medalists who are taller than the average and there doesn't seem to be a significant relationship between medaling and gymnast height.</p>
+<br>
+
+<p><b>Conclusion: </b>Overall, the gymnasts who won medals in the Olympics did seem to be slightly shorter than those who did not place, but not by a significant amount. The average height of gold medalists was only 2 cm shorter than the average height of gymnasts who did not place. While it does seem that shorter gymnasts have a slight advantage (in balance and rotations), there are many taller gymnasts who are talented and successful.</p>
 
 <script>
 const margin = {top: 10, right: 30, bottom: 30, left:60}
@@ -42,7 +62,7 @@ const height = 400 - margin.top - margin.bottom
 const svg = d3.select("#chart")
                 .append("svg")
                 .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
+                .attr("height", height + margin.top + margin.bottom + 20)
                 .append("g")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`)
 
@@ -114,6 +134,30 @@ d3.csv("athlete_events.csv", function(d) {
     svg.append("g")
         .call(d3.axisLeft(y))
 
+    // x axis label
+    svg.append("text")
+        .attr("x", 180 )
+        .attr("y", 400 )
+        .style("text-anchor", "middle")
+        .text("Medal");
+
+    // y axis label
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Average Height (cm)");
+
+    // Title
+    svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", margin.top)
+        .attr("text-anchor", "middle")  
+        .style("font-size", "16px") 
+        .text("Female Gymnasts' Average Height vs. Medal");
+
     // Create a tooltip
     var tooltip = d3.select("#tooltip")
         .style("visibility", "hidden")
@@ -136,7 +180,7 @@ d3.csv("athlete_events.csv", function(d) {
                     image.attr("src", d.medal + ".png");
                 }
                 return tooltip.style("visibility", "visible")   
-                                .html("Height: " + d.height);
+                                .html("Average Height (cm): " + d.height);
             })
             .on("mouseout", function(e, d) { 
                 image.attr("src", "all.png");
