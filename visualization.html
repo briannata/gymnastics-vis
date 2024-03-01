@@ -50,6 +50,8 @@ d3.csv("athlete_events.csv", function(d) {
     return {
         height: +d['Height'],
         medal: d["Medal"],
+        sex: d["Sex"],
+        sport: d["Sport"]
     }
 }).then(function(data) {
 
@@ -68,9 +70,11 @@ d3.csv("athlete_events.csv", function(d) {
     };
 
     data.forEach(function(d) {
-        if(!isNaN(d.height)) {
-            sums[d.medal] += d.height;
-            num[d.medal] += 1;
+        if(d.sex == "F" && d.sport == "Gymnastics") {
+            if(!isNaN(d.height)) {
+                sums[d.medal] += d.height;
+                num[d.medal] += 1;
+            }
         }
     })
 
